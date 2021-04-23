@@ -1,0 +1,16 @@
+该开发网址可以方便查看json文件，和浏览网页
+
+
+1.把网址复制到url，点击submit会显示列表。若格式不是json，网页会跳转到这个url并在新窗口打开。
+2.点击加减号可以看详情/收起
+3.看到网址，在网址文字位置，三击鼠标左键全选；复制链接，粘贴到url框，重新submit。
+4.点击last，next可以跳转到上一个/下一个json网址。
+5.注意！！！如果刷新界面，记录不会保存。
+
+
+！！！
+该网站“https://api.census.gov/data/timeseries/asm/state”有提供api和说明文档，比如"https://project-open-data.cio.gov/v1.1/schema"。
+
+
+
+by——Uking

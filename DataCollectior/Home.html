@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Data</title> 
+	<script src="jquery-latest.js"></script>
+	<script src="data.json"></script>
+	<style>
+		table.dataintable {
+		   border: 1px solid #888888;
+		   border-collapse: collapse;
+		   font-family: Arial,Helvetica,sans-serif;
+		   margin-top: 10px;
+		   width: 100%;
+		}
+		table.dataintable th {
+		   background-color: #CCCCCC;
+		   border: 1px solid #888888;
+		   padding: 5px 15px 5px 5px;
+		   text-align: left;
+		   vertical-align: baseline;
+		}
+		table.dataintable td {
+		   background-color: #EFEFEF;
+		   border: 1px solid #AAAAAA;
+		   padding: 5px 15px 5px 5px;
+		   vertical-align: text-top;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<div algin="center" style="margin:1% 1% 1% 1%;" width="75%">
+			<input type="button" value="Total" onclick="total()"/>
+			<select id="S1"></select>
+			<select id="S2"></select>
+			<input type="button" value="Table" onclick="table()"/>
+		</div>
+		<block id="tbody1">
+		<block/>
+	</div>
+	<script>
+		var order = ['Q1','Q2','Q3','Q4','Q5','R1','R2','R3','R4','R5','R6','R7'];
+		var map = new Map();
+		map.set('Q1','Gender');
+		map.set('Q2','Age');
+		map.set('Q3','Role');
+		map.set('Q4','Degree Goal');
+		map.set('Q5','Nationality');
+		map.set('R1','How often do you play video games? ');
+		map.set('R2','Which game platforms do you most frequently play on?');
+		map.set('R3','Which kind of game do you like best?');
+		map.set('R4','How long do you play games at a time?');
+		map.set('R5','What kind of payment method for games do you like?');
+		map.set('R6','What kind of person do you play video games with normally? ');
+		map.set('R7','What’s your purpose of playing video games? ');
+		var Opt = [
+		['Female', 'Male', 'Other'],
+		['Under 18', '18~20', '21~30', 'Over 30'],
+		['Facutlty', 'Student', 'Staff', 'Other'],
+		['BA/BS', 'MA/MS', 'PhD', 'Other'],
+		['America', 'China', 'Saudi Arbia', 'India', 'United Kingdom', 'Other'],
+		['Every day', 'Several times a week', 'Once a week', 'Occasional', 'Never'],
+		['PC', 'Cellphone', 'Tablet', 'Console', 'Arcade Game', 'Other'],
+		['FPS (First-person shooting game)', 'RTS (Real-Time Strategy Game)', 'MOBA (Multiplayer Online Battle Arena)', 'SLG(Simulation Game)', 'ACT(Action Game)', 'FTG (Fighting Game)', 'RAC (Race Game)', 'AVG (Adventure Game)', 'RPG (Role-playing game)', 'SPT(Sport game)'],
+		['<10m', '>=10m & <30m', '>=30m & 1h', '>=1h & <2h', '>=2h'],
+		['One-time payment', 'DLC payment', 'In-time payment', 'Free'],
+		['Some people you met', 'Some people you never  met', 'Alone', 'Other'],
+		['To reduces stress', 'To have fun/ be happy', 'To pursue mental challenge', 'To compatition'],
+		];
+		var s1Data="<option value='-1'></option>";
+		for(var j=0;j<order.length;j++){
+			s1Data+="<option value='"+j+"'>"+order[j]+":"+map.get(order[j])+"</option>"
+		}
+		var s2Data="<option value='-1'></option>";
+		for(var j=0;j<order.length;j++){
+			s2Data+="<option value='"+j+"'>"+order[j]+":"+map.get(order[j])+"</option>"
+		}
+		$("#S1").html(s1Data)
+		$("#S2").html(s2Data)
+		function total(){
+			var mydata = JSON.parse(data);
+			creatTableTotal(mydata);
+		}
+		function table(){
+			var mydata = JSON.parse(data);
+			creatTable(mydata);
+		}
+		function creatTableTotal(data){
+			var tableData="<table class='dataintable'>"
+			tableData+="<tr>"
+			tableData+="<th>ID</th>"
+			for(var j=0;j<order.length;j++){
+				tableData+="<th>"+order[j]+":"+map.get(order[j])+"</th>"
+			}
+			tableData+="</tr>"
+			for(var i=0;i<data.length;i++){
+				tableData+="<tr>"
+				tableData+="<td>"+data[i]['id']+"</td>"
+				for(var j=0;j<order.length;j++){
+					var strs = data[i][order[j]].split(' ');
+					tableData+="<td>";
+					for(var k=0;k<strs.length;k++){
+						var str = strs[k].split('-');
+						tableData += (k >= 1 ? ',':'') + Opt[j][(parseInt(str[0])-1)]
+						+(str.length>=2?' '+str[1]:'');
+					}
+					tableData+="</td>";
+				}
+				tableData+="</tr>"
+			}
+			tableData+="</table>"
+			$("#tbody1").html(tableData)
+		}
+		function creatTable(data){
+			var select1=parseInt(document.getElementById("S1").value);
+			var select2=parseInt(document.getElementById("S2").value);
+			var count1 = [];
+			var count2 = [[]];
+			if (select1 == '-1'){
+				alert('请先选择');
+				return;
+			}
+			else if (select1 == select2){
+				alert('选择不能相同');
+				return;
+			}
+			else if (select2 == -1){
+				var count1 = new Int8Array(Opt[select1].length);
+				for (var i=0;i<data.length;i++){
+					var strs = data[i][order[select1]].split(' ');
+					for(var k=0;k<strs.length;k++){
+						var str = strs[k].split('-');
+						count1[(parseInt(str[0])-1)]++;
+					}
+				}
+			}
+			else{
+				var count2 = new Array();
+				for (var j=0;j<Opt[select2].length;j++){
+					count2[j] = new Array();
+					for(var i=0;i<Opt[select1].length;i++)
+						count2[j][i]=0;
+				}
+				for (var i=0;i<data.length;i++){
+					if(data[i][order[select1]]==''||data[i][order[select2]]=='')
+						continue;
+					var strs1 = data[i][order[select1]].split(' ');
+					var strs2 = data[i][order[select2]].split(' ');
+					for(var k1=0;k1<strs1.length;k1++){
+						var idx1 = parseInt(strs1[k1].split('-')[0])-1;
+						for(var k2=0;k2<strs2.length;k2++){
+							var idx2 = parseInt(strs2[k2].split('-')[0])-1;
+							count2[idx2][idx1]++;
+						}
+					}
+				}
+			}
+			var tableData="<table class='dataintable'>"
+			tableData+="<tr>";
+			if(select2!=-1)
+				tableData+="<th> </th>";
+			for(var j=0;j<Opt[select1].length;j++){
+				tableData+="<th>"+Opt[select1][j]+"</th>"
+			}
+			tableData+="</tr>"
+			if(select2==-1){
+				tableData+="<tr>"
+				for(var j=0;j<count1.length;j++){
+					tableData+="<td>";
+					tableData+=count1[j];
+					tableData+="</td>";
+				}
+				tableData+="</tr>"
+			}
+			else{
+				for(var i=0;i<count2.length;i++){
+					tableData+="<tr>"
+					tableData+="<th>"+Opt[select2][i]+"</th>"
+					for(var j=0;j<count2[i].length;j++){
+						tableData+="<td>";
+						tableData+=count2[i][j];
+						tableData+="</td>";
+					}
+					tableData+="</tr>"
+				}
+			}
+			tableData+="</table>"
+			$("#tbody1").html(tableData)
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+	<link rel="stylesheet" type="text/css" href="jsoneditor.css"/> 
+	<script src="jquery.min.js"></script>
+	<script src="jquery.jsoneditor.js"></script>
+</head>
+<body>
+	<div>
+		<div algin="center" style="margin:1% 1% 1% 1%;" width="75%">
+			URL: <input type="url" id="url" width="50%"
+			value="https://api.census.gov/data/timeseries/asm/state"/>
+			<input type="button" value="submit" onclick="post()"/>
+		</div>
+		<div algin="center" style="margin:1% 1% 1% 1%;" width="75%">
+			<input type="button" id="last" value="last" onclick="last()" disabled/>
+			<input type="button" id="next" value="next" onclick="next()" disabled/>
+		</div>
+		<div id="editor" class="json-editor"></div>
+		<pre id="json" style="visibility: none;"></pre>
+	</div>
+	<script>
+		index = -1;
+		pages = [];
+		function last(){
+			index--;
+			postUrl(pages[index],false);
+		}
+		function next(){
+			index++;
+			postUrl(pages[index],false);
+		}
+		function update(){
+			if(index>0){
+				document.getElementById("last").disabled=false;
+			}
+			else{
+				document.getElementById("last").disabled=true;			
+			}
+			if(index<pages.length-1){
+				document.getElementById("next").disabled=false;
+			}
+			else{
+				document.getElementById("next").disabled=true;			
+			}
+		}
+		function post(){
+			var url = document.getElementById("url").value;
+			postUrl(url,true);
+		}
+		var tUrl = "";
+		function postUrl(url, isNew){
+			if(isNew){
+				if(url[0]=='"')
+					url = url.substring(1,url.length);
+				if(url[url.length-1]=='"')
+					url = url.substring(0,url.length-1);
+				if(!isUrl(url)){
+					alert("URL is not correct!");
+					return;
+				}
+				tUrl = url;
+				$.getJSON(url, function(data) {
+				}).done(function(data){
+					if(isJson(data))
+						success(data);
+					else
+						error();
+				}).fail(function(){
+					error();
+				});	
+			}
+			else{
+				$.getJSON(url, function(data) {
+					show(data);
+				})
+				update();
+			}
+		}
+		function success(data){
+			pages.push(tUrl);
+			index++;
+			update();
+			show(data);
+		}
+		function error(){
+			window.open(tUrl ,"_blank");
+		}
+		function show(json){
+			$('#editor').jsonEditor(json,
+			{
+				change: function() {
+					//$('#json').html(JSON.stringify(json));
+				}
+			});
+		}
+		function isUrl(URL){
+			var str=URL;
+			var Expression = "^((https|http|ftp|rtsp|mms)?://)"
+		+ "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" // ftp的user@
+		+ "(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP形式的URL- 199.194.52.184
+		+ "|" // 允许IP和DOMAIN（域名）
+		+ "([0-9a-z_!~*'()-]+\.)*" // 域名- www.
+		+ "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\." // 二级域名
+		+ "[a-z]{2,6})" // first level domain- .com or .museum
+		+ "(:[0-9]{1,4})?" // 端口- :80
+		+ "((/?)|" // a slash isn't required if there is no file name
+		+ "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+			var objExp=new RegExp(Expression);
+			if(objExp.test(str)==true){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		function isJson(data){
+			try{
+	    		if(typeof data == 'object' && JSON.stringify(data)){
+		    		return true;
+				}else{
+			    	return false;
+				}
+	    	}catch(e){
+	    		return false;
+	    	}
+		}
+	</script>
+</body>
+</html>
